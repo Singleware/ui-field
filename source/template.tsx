@@ -132,8 +132,8 @@ export class Template extends Control.Component<Properties> {
    */
   @Class.Private()
   private bindHandlers(): void {
-    this.skeleton.addEventListener('keyup', Class.bindCallback(this.changeHandler), true);
-    this.skeleton.addEventListener('change', Class.bindCallback(this.changeHandler), true);
+    this.skeleton.addEventListener('keyup', this.changeHandler.bind(this), true);
+    this.skeleton.addEventListener('change', this.changeHandler.bind(this), true);
   }
 
   /**
@@ -142,16 +142,16 @@ export class Template extends Control.Component<Properties> {
   @Class.Private()
   private bindProperties(): void {
     Object.defineProperties(this.skeleton, {
-      label: super.bindDescriptor(Template.prototype, 'label'),
-      type: super.bindDescriptor(Template.prototype, 'type'),
-      name: super.bindDescriptor(Template.prototype, 'name'),
-      value: super.bindDescriptor(Template.prototype, 'value'),
-      empty: super.bindDescriptor(Template.prototype, 'empty'),
-      required: super.bindDescriptor(Template.prototype, 'required'),
-      readOnly: super.bindDescriptor(Template.prototype, 'readOnly'),
-      disabled: super.bindDescriptor(Template.prototype, 'disabled'),
-      orientation: super.bindDescriptor(Template.prototype, 'orientation'),
-      setCustomValidity: super.bindDescriptor(Template.prototype, 'setCustomValidity')
+      label: super.bindDescriptor(this, Template.prototype, 'label'),
+      type: super.bindDescriptor(this, Template.prototype, 'type'),
+      name: super.bindDescriptor(this, Template.prototype, 'name'),
+      value: super.bindDescriptor(this, Template.prototype, 'value'),
+      empty: super.bindDescriptor(this, Template.prototype, 'empty'),
+      required: super.bindDescriptor(this, Template.prototype, 'required'),
+      readOnly: super.bindDescriptor(this, Template.prototype, 'readOnly'),
+      disabled: super.bindDescriptor(this, Template.prototype, 'disabled'),
+      orientation: super.bindDescriptor(this, Template.prototype, 'orientation'),
+      setCustomValidity: super.bindDescriptor(this, Template.prototype, 'setCustomValidity')
     });
   }
 
