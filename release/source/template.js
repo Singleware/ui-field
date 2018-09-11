@@ -27,6 +27,12 @@ let Template = Template_1 = class Template extends Control.Component {
     constructor(properties, children) {
         super(properties, children);
         /**
+         * Field states.
+         */
+        this.states = {
+            unwind: false
+        };
+        /**
          * Prepend element.
          */
         this.prependSlot = DOM.create("slot", { name: "prepend", class: "prepend" });
@@ -88,26 +94,45 @@ let Template = Template_1 = class Template extends Control.Component {
          * Field skeleton.
          */
         this.skeleton = (DOM.create("div", { slot: this.properties.slot, class: this.properties.class }, this.children));
-        /**
-         * Field elements.
-         */
-        this.elements = DOM.append(this.skeleton.attachShadow({ mode: 'closed' }), this.styles, this.field);
+        DOM.append(this.skeleton.attachShadow({ mode: 'closed' }), this.styles, this.field);
         this.bindHandlers();
         this.bindProperties();
         this.assignProperties();
     }
     /**
+     * Updates the empty state into the field element.
+     * @param field Field element.
+     */
+    updateEmptyState(field) {
+        if (this.empty) {
+            field.dataset.empty = 'on';
+        }
+        else {
+            delete field.dataset.empty;
+        }
+    }
+    /**
+     * Updates the checked states into the field element.
+     * @param field Field element.
+     */
+    updateCheckedState(field) {
+        if (this.checked) {
+            field.dataset.checked = 'on';
+        }
+        else {
+            delete field.dataset.checked;
+        }
+    }
+    /**
      * Change event handler.
      */
     changeHandler() {
-        const field = Control.getChildByProperty(this.centerSlot, 'value');
-        if (field) {
-            if (this.empty) {
-                field.dataset.empty = 'on';
-            }
-            else {
-                delete field.dataset.empty;
-            }
+        let field;
+        if ((field = Control.getChildByProperty(this.centerSlot, 'value'))) {
+            this.updateEmptyState(field);
+        }
+        if ((field = Control.getChildByProperty(this.centerSlot, 'checked'))) {
+            this.updateCheckedState(field);
         }
     }
     /**
@@ -125,32 +150,39 @@ let Template = Template_1 = class Template extends Control.Component {
             label: super.bindDescriptor(this, Template_1.prototype, 'label'),
             type: super.bindDescriptor(this, Template_1.prototype, 'type'),
             name: super.bindDescriptor(this, Template_1.prototype, 'name'),
+            unwind: super.bindDescriptor(this, Template_1.prototype, 'unwind'),
             value: super.bindDescriptor(this, Template_1.prototype, 'value'),
+            checked: super.bindDescriptor(this, Template_1.prototype, 'checked'),
+            defaultValue: super.bindDescriptor(this, Template_1.prototype, 'defaultValue'),
+            defaultChecked: super.bindDescriptor(this, Template_1.prototype, 'defaultChecked'),
             empty: super.bindDescriptor(this, Template_1.prototype, 'empty'),
             required: super.bindDescriptor(this, Template_1.prototype, 'required'),
             readOnly: super.bindDescriptor(this, Template_1.prototype, 'readOnly'),
             disabled: super.bindDescriptor(this, Template_1.prototype, 'disabled'),
             orientation: super.bindDescriptor(this, Template_1.prototype, 'orientation'),
-            setCustomValidity: super.bindDescriptor(this, Template_1.prototype, 'setCustomValidity')
+            reportValidity: super.bindDescriptor(this, Template_1.prototype, 'reportValidity'),
+            checkValidity: super.bindDescriptor(this, Template_1.prototype, 'checkValidity'),
+            setCustomValidity: super.bindDescriptor(this, Template_1.prototype, 'setCustomValidity'),
+            reset: super.bindDescriptor(this, Template_1.prototype, 'reset')
         });
     }
     /**
      * Assign all element properties.
      */
     assignProperties() {
-        Control.assignProperties(this, this.properties, ['label', 'type', 'name', 'value', 'required', 'readOnly', 'disabled']);
+        Control.assignProperties(this, this.properties, [
+            'label',
+            'type',
+            'name',
+            'unwind',
+            'value',
+            'checked',
+            'required',
+            'readOnly',
+            'disabled'
+        ]);
         this.orientation = this.properties.orientation || 'row';
         this.changeHandler();
-    }
-    /**
-     * Set the custom validity error message.
-     * @param error Custom error message.
-     */
-    setCustomValidity(error) {
-        const field = Control.getChildByProperty(this.centerSlot, 'setCustomValidity');
-        if (field) {
-            field.setCustomValidity(error);
-        }
     }
     /**
      * Get field label.
@@ -166,18 +198,6 @@ let Template = Template_1 = class Template extends Control.Component {
         DOM.append(DOM.clear(this.labelSlot), label);
     }
     /**
-     * Get field name.
-     */
-    get name() {
-        return Control.getChildProperty(this.centerSlot, 'name');
-    }
-    /**
-     * Set field name.
-     */
-    set name(name) {
-        Control.setChildProperty(this.centerSlot, 'name', name);
-    }
-    /**
      * Get field type.
      */
     get type() {
@@ -190,6 +210,30 @@ let Template = Template_1 = class Template extends Control.Component {
         Control.setChildProperty(this.centerSlot, 'type', type);
     }
     /**
+     * Get field name.
+     */
+    get name() {
+        return Control.getChildProperty(this.centerSlot, 'name');
+    }
+    /**
+     * Set field name.
+     */
+    set name(name) {
+        Control.setChildProperty(this.centerSlot, 'name', name);
+    }
+    /**
+     * Get unwind state.
+     */
+    get unwind() {
+        return this.states.unwind;
+    }
+    /**
+     * Set unwind state.
+     */
+    set unwind(state) {
+        this.states.unwind = state;
+    }
+    /**
      * Get field value.
      */
     get value() {
@@ -199,7 +243,39 @@ let Template = Template_1 = class Template extends Control.Component {
      * Set field value.
      */
     set value(value) {
-        Control.setChildProperty(this.centerSlot, 'value', value);
+        const field = Control.getChildByProperty(this.centerSlot, 'value');
+        if (field) {
+            field.value = value;
+            this.updateEmptyState(field);
+        }
+    }
+    /**
+     * Get checked state.
+     */
+    get checked() {
+        return Control.getChildProperty(this.centerSlot, 'checked');
+    }
+    /**
+     * Set checked state.
+     */
+    set checked(state) {
+        const field = Control.getChildByProperty(this.centerSlot, 'checked');
+        if (field) {
+            field.checked = state;
+            this.updateCheckedState(field);
+        }
+    }
+    /**
+     * Get default value.
+     */
+    get defaultValue() {
+        return Control.getChildProperty(this.centerSlot, 'defaultValue');
+    }
+    /**
+     * Get default checked state.
+     */
+    get defaultChecked() {
+        return Control.getChildProperty(this.centerSlot, 'defaultChecked');
     }
     /**
      * Get empty state.
@@ -261,7 +337,50 @@ let Template = Template_1 = class Template extends Control.Component {
     get element() {
         return this.skeleton;
     }
+    /**
+     * Checks the field validity.
+     * @returns Returns true when the field is valid, false otherwise.
+     */
+    checkValidity() {
+        let field = Control.getChildByProperty(this.centerSlot, 'checkValidity');
+        return field ? field.checkValidity() : true;
+    }
+    /**
+     * Reports the field validity.
+     * @returns Returns true when the field is valid, false otherwise.
+     */
+    reportValidity() {
+        let field = Control.getChildByProperty(this.centerSlot, 'reportValidity');
+        return field ? field.reportValidity() : this.checkValidity();
+    }
+    /**
+     * Set the custom validity error message.
+     * @param error Custom error message.
+     */
+    setCustomValidity(error) {
+        const field = Control.getChildByProperty(this.centerSlot, 'setCustomValidity');
+        if (field) {
+            field.setCustomValidity(error);
+        }
+    }
+    /**
+     * Reset the field to its initial value and state.
+     */
+    reset() {
+        const field = Control.getChildByProperty(this.centerSlot, 'reset');
+        if (field) {
+            field.reset();
+        }
+        else {
+            this.value = this.defaultValue;
+            this.checked = this.defaultChecked;
+        }
+        this.changeHandler();
+    }
 };
+__decorate([
+    Class.Private()
+], Template.prototype, "states", void 0);
 __decorate([
     Class.Private()
 ], Template.prototype, "prependSlot", void 0);
@@ -288,7 +407,10 @@ __decorate([
 ], Template.prototype, "skeleton", void 0);
 __decorate([
     Class.Private()
-], Template.prototype, "elements", void 0);
+], Template.prototype, "updateEmptyState", null);
+__decorate([
+    Class.Private()
+], Template.prototype, "updateCheckedState", null);
 __decorate([
     Class.Private()
 ], Template.prototype, "changeHandler", null);
@@ -303,19 +425,28 @@ __decorate([
 ], Template.prototype, "assignProperties", null);
 __decorate([
     Class.Public()
-], Template.prototype, "setCustomValidity", null);
-__decorate([
-    Class.Public()
 ], Template.prototype, "label", null);
-__decorate([
-    Class.Public()
-], Template.prototype, "name", null);
 __decorate([
     Class.Public()
 ], Template.prototype, "type", null);
 __decorate([
     Class.Public()
+], Template.prototype, "name", null);
+__decorate([
+    Class.Public()
+], Template.prototype, "unwind", null);
+__decorate([
+    Class.Public()
 ], Template.prototype, "value", null);
+__decorate([
+    Class.Public()
+], Template.prototype, "checked", null);
+__decorate([
+    Class.Public()
+], Template.prototype, "defaultValue", null);
+__decorate([
+    Class.Public()
+], Template.prototype, "defaultChecked", null);
 __decorate([
     Class.Public()
 ], Template.prototype, "empty", null);
@@ -334,6 +465,18 @@ __decorate([
 __decorate([
     Class.Public()
 ], Template.prototype, "element", null);
+__decorate([
+    Class.Public()
+], Template.prototype, "checkValidity", null);
+__decorate([
+    Class.Public()
+], Template.prototype, "reportValidity", null);
+__decorate([
+    Class.Public()
+], Template.prototype, "setCustomValidity", null);
+__decorate([
+    Class.Public()
+], Template.prototype, "reset", null);
 Template = Template_1 = __decorate([
     Class.Describe()
 ], Template);

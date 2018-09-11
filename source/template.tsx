@@ -8,6 +8,7 @@ import * as Control from '@singleware/ui-control';
 
 import { Properties } from './properties';
 import { Element } from './element';
+import { States } from './states';
 
 /**
  * Field template class.
@@ -15,28 +16,36 @@ import { Element } from './element';
 @Class.Describe()
 export class Template extends Control.Component<Properties> {
   /**
+   * Field states.
+   */
+  @Class.Private()
+  private states = {
+    unwind: false
+  } as States;
+
+  /**
    * Prepend element.
    */
   @Class.Private()
-  private prependSlot: HTMLSlotElement = <slot name="prepend" class="prepend" /> as HTMLSlotElement;
+  private prependSlot = <slot name="prepend" class="prepend" /> as HTMLSlotElement;
 
   /**
    * Center element.
    */
   @Class.Private()
-  private centerSlot: HTMLSlotElement = <slot name="center" class="center" /> as HTMLSlotElement;
+  private centerSlot = <slot name="center" class="center" /> as HTMLSlotElement;
 
   /**
    * Append element.
    */
   @Class.Private()
-  private appendSlot: HTMLSlotElement = <slot name="append" class="append" /> as HTMLSlotElement;
+  private appendSlot = <slot name="append" class="append" /> as HTMLSlotElement;
 
   /**
    * Group element.
    */
   @Class.Private()
-  private group: HTMLDivElement = (
+  private group = (
     <div class="group">
       {this.prependSlot}
       {this.centerSlot}
@@ -48,13 +57,13 @@ export class Template extends Control.Component<Properties> {
    * Label element.
    */
   @Class.Private()
-  private labelSlot: HTMLSlotElement = <slot name="label" class="label" /> as HTMLSlotElement;
+  private labelSlot = <slot name="label" class="label" /> as HTMLSlotElement;
 
   /**
    * Field element.
    */
   @Class.Private()
-  private field: HTMLLabelElement = (
+  private field = (
     <label class="field">
       {this.labelSlot}
       {this.group}
@@ -65,7 +74,7 @@ export class Template extends Control.Component<Properties> {
    * Field styles.
    */
   @Class.Private()
-  private styles: HTMLStyleElement = (
+  private styles = (
     <style>
       {`:host > .field {
   display: flex;
@@ -100,30 +109,49 @@ export class Template extends Control.Component<Properties> {
    * Field skeleton.
    */
   @Class.Private()
-  private skeleton: Element = (
+  private skeleton = (
     <div slot={this.properties.slot} class={this.properties.class}>
       {this.children}
     </div>
   ) as Element;
 
   /**
-   * Field elements.
+   * Updates the empty state into the field element.
+   * @param field Field element.
    */
   @Class.Private()
-  private elements: ShadowRoot = DOM.append(this.skeleton.attachShadow({ mode: 'closed' }), this.styles, this.field) as ShadowRoot;
+  private updateEmptyState(field: HTMLElement): void {
+    if (this.empty) {
+      field.dataset.empty = 'on';
+    } else {
+      delete field.dataset.empty;
+    }
+  }
+
+  /**
+   * Updates the checked states into the field element.
+   * @param field Field element.
+   */
+  @Class.Private()
+  private updateCheckedState(field: HTMLElement): void {
+    if (this.checked) {
+      field.dataset.checked = 'on';
+    } else {
+      delete field.dataset.checked;
+    }
+  }
 
   /**
    * Change event handler.
    */
   @Class.Private()
   private changeHandler(): void {
-    const field = Control.getChildByProperty(this.centerSlot, 'value');
-    if (field) {
-      if (this.empty) {
-        field.dataset.empty = 'on';
-      } else {
-        delete field.dataset.empty;
-      }
+    let field;
+    if ((field = Control.getChildByProperty(this.centerSlot, 'value'))) {
+      this.updateEmptyState(field);
+    }
+    if ((field = Control.getChildByProperty(this.centerSlot, 'checked'))) {
+      this.updateCheckedState(field);
     }
   }
 
@@ -145,13 +173,20 @@ export class Template extends Control.Component<Properties> {
       label: super.bindDescriptor(this, Template.prototype, 'label'),
       type: super.bindDescriptor(this, Template.prototype, 'type'),
       name: super.bindDescriptor(this, Template.prototype, 'name'),
+      unwind: super.bindDescriptor(this, Template.prototype, 'unwind'),
       value: super.bindDescriptor(this, Template.prototype, 'value'),
+      checked: super.bindDescriptor(this, Template.prototype, 'checked'),
+      defaultValue: super.bindDescriptor(this, Template.prototype, 'defaultValue'),
+      defaultChecked: super.bindDescriptor(this, Template.prototype, 'defaultChecked'),
       empty: super.bindDescriptor(this, Template.prototype, 'empty'),
       required: super.bindDescriptor(this, Template.prototype, 'required'),
       readOnly: super.bindDescriptor(this, Template.prototype, 'readOnly'),
       disabled: super.bindDescriptor(this, Template.prototype, 'disabled'),
       orientation: super.bindDescriptor(this, Template.prototype, 'orientation'),
-      setCustomValidity: super.bindDescriptor(this, Template.prototype, 'setCustomValidity')
+      reportValidity: super.bindDescriptor(this, Template.prototype, 'reportValidity'),
+      checkValidity: super.bindDescriptor(this, Template.prototype, 'checkValidity'),
+      setCustomValidity: super.bindDescriptor(this, Template.prototype, 'setCustomValidity'),
+      reset: super.bindDescriptor(this, Template.prototype, 'reset')
     });
   }
 
@@ -160,7 +195,17 @@ export class Template extends Control.Component<Properties> {
    */
   @Class.Private()
   private assignProperties(): void {
-    Control.assignProperties(this, this.properties, ['label', 'type', 'name', 'value', 'required', 'readOnly', 'disabled']);
+    Control.assignProperties(this, this.properties, [
+      'label',
+      'type',
+      'name',
+      'unwind',
+      'value',
+      'checked',
+      'required',
+      'readOnly',
+      'disabled'
+    ]);
     this.orientation = this.properties.orientation || 'row';
     this.changeHandler();
   }
@@ -172,21 +217,10 @@ export class Template extends Control.Component<Properties> {
    */
   constructor(properties?: Properties, children?: any[]) {
     super(properties, children);
+    DOM.append(this.skeleton.attachShadow({ mode: 'closed' }), this.styles, this.field);
     this.bindHandlers();
     this.bindProperties();
     this.assignProperties();
-  }
-
-  /**
-   * Set the custom validity error message.
-   * @param error Custom error message.
-   */
-  @Class.Public()
-  public setCustomValidity(error?: string): void {
-    const field = Control.getChildByProperty(this.centerSlot, 'setCustomValidity');
-    if (field) {
-      (field as any).setCustomValidity(error);
-    }
   }
 
   /**
@@ -206,21 +240,6 @@ export class Template extends Control.Component<Properties> {
   }
 
   /**
-   * Get field name.
-   */
-  @Class.Public()
-  public get name(): string {
-    return Control.getChildProperty(this.centerSlot, 'name');
-  }
-
-  /**
-   * Set field name.
-   */
-  public set name(name: string) {
-    Control.setChildProperty(this.centerSlot, 'name', name);
-  }
-
-  /**
    * Get field type.
    */
   @Class.Public()
@@ -236,6 +255,36 @@ export class Template extends Control.Component<Properties> {
   }
 
   /**
+   * Get field name.
+   */
+  @Class.Public()
+  public get name(): string {
+    return Control.getChildProperty(this.centerSlot, 'name');
+  }
+
+  /**
+   * Set field name.
+   */
+  public set name(name: string) {
+    Control.setChildProperty(this.centerSlot, 'name', name);
+  }
+
+  /**
+   * Get unwind state.
+   */
+  @Class.Public()
+  public get unwind(): boolean {
+    return this.states.unwind;
+  }
+
+  /**
+   * Set unwind state.
+   */
+  public set unwind(state: boolean) {
+    this.states.unwind = state;
+  }
+
+  /**
    * Get field value.
    */
   @Class.Public()
@@ -247,7 +296,46 @@ export class Template extends Control.Component<Properties> {
    * Set field value.
    */
   public set value(value: any) {
-    Control.setChildProperty(this.centerSlot, 'value', value);
+    const field = Control.getChildByProperty(this.centerSlot, 'value') as any;
+    if (field) {
+      field.value = value;
+      this.updateEmptyState(field);
+    }
+  }
+
+  /**
+   * Get checked state.
+   */
+  @Class.Public()
+  public get checked(): boolean {
+    return Control.getChildProperty(this.centerSlot, 'checked');
+  }
+
+  /**
+   * Set checked state.
+   */
+  public set checked(state: boolean) {
+    const field = Control.getChildByProperty(this.centerSlot, 'checked') as any;
+    if (field) {
+      field.checked = state;
+      this.updateCheckedState(field);
+    }
+  }
+
+  /**
+   * Get default value.
+   */
+  @Class.Public()
+  public get defaultValue(): any {
+    return Control.getChildProperty(this.centerSlot, 'defaultValue');
+  }
+
+  /**
+   * Get default checked state.
+   */
+  @Class.Public()
+  public get defaultChecked(): boolean {
+    return Control.getChildProperty(this.centerSlot, 'defaultChecked');
   }
 
   /**
@@ -324,5 +412,52 @@ export class Template extends Control.Component<Properties> {
   @Class.Public()
   public get element(): Element {
     return this.skeleton;
+  }
+
+  /**
+   * Checks the field validity.
+   * @returns Returns true when the field is valid, false otherwise.
+   */
+  @Class.Public()
+  public checkValidity(): boolean {
+    let field = Control.getChildByProperty(this.centerSlot, 'checkValidity') as any;
+    return field ? field.checkValidity() : true;
+  }
+
+  /**
+   * Reports the field validity.
+   * @returns Returns true when the field is valid, false otherwise.
+   */
+  @Class.Public()
+  public reportValidity(): boolean {
+    let field = Control.getChildByProperty(this.centerSlot, 'reportValidity') as any;
+    return field ? field.reportValidity() : this.checkValidity();
+  }
+
+  /**
+   * Set the custom validity error message.
+   * @param error Custom error message.
+   */
+  @Class.Public()
+  public setCustomValidity(error?: string): void {
+    const field = Control.getChildByProperty(this.centerSlot, 'setCustomValidity') as any;
+    if (field) {
+      field.setCustomValidity(error);
+    }
+  }
+
+  /**
+   * Reset the field to its initial value and state.
+   */
+  @Class.Public()
+  public reset(): void {
+    const field = Control.getChildByProperty(this.centerSlot, 'reset') as any;
+    if (field) {
+      field.reset();
+    } else {
+      this.value = this.defaultValue;
+      this.checked = this.defaultChecked;
+    }
+    this.changeHandler();
   }
 }

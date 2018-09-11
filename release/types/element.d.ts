@@ -20,9 +20,25 @@ export interface Element extends HTMLDivElement {
    */
   name: string;
   /**
+   * Determines whether the field values must be unrolled.
+   */
+  unwind: boolean;
+  /**
    * Field value.
    */
   value: any;
+  /**
+   * Checked state.
+   */
+  checked: boolean;
+  /**
+   * Default field value.
+   */
+  readonly defaultValue: any;
+  /**
+   * Default checked state.
+   */
+  readonly defaultChecked: boolean;
   /**
    * Determines whether the field is empty or not.
    */
@@ -44,8 +60,22 @@ export interface Element extends HTMLDivElement {
    */
   orientation: string;
   /**
+   * Checks the field validity.
+   * @returns Returns true when the field is valid, false otherwise.
+   */
+  checkValidity: () => boolean;
+  /**
+   * Reports the field validity.
+   * @returns Returns true when the field is valid, false otherwise.
+   */
+  reportValidity: () => boolean;
+  /**
    * Set the custom validity error message.
    * @param error Custom error message.
    */
   setCustomValidity: (error?: string) => void;
+  /**
+   * Reset the field to its initial value and state.
+   */
+  reset: () => void;
 }

@@ -6,6 +6,10 @@ import { Element } from './element';
  */
 export declare class Template extends Control.Component<Properties> {
     /**
+     * Field states.
+     */
+    private states;
+    /**
      * Prepend element.
      */
     private prependSlot;
@@ -38,9 +42,15 @@ export declare class Template extends Control.Component<Properties> {
      */
     private skeleton;
     /**
-     * Field elements.
+     * Updates the empty state into the field element.
+     * @param field Field element.
      */
-    private elements;
+    private updateEmptyState;
+    /**
+     * Updates the checked states into the field element.
+     * @param field Field element.
+     */
+    private updateCheckedState;
     /**
      * Change event handler.
      */
@@ -64,24 +74,12 @@ export declare class Template extends Control.Component<Properties> {
      */
     constructor(properties?: Properties, children?: any[]);
     /**
-     * Set the custom validity error message.
-     * @param error Custom error message.
-     */
-    setCustomValidity(error?: string): void;
-    /**
      * Get field label.
      */
     /**
     * Set field label.
     */
     label: any;
-    /**
-     * Get field name.
-     */
-    /**
-    * Set field name.
-    */
-    name: string;
     /**
      * Get field type.
      */
@@ -90,12 +88,41 @@ export declare class Template extends Control.Component<Properties> {
     */
     type: string;
     /**
+     * Get field name.
+     */
+    /**
+    * Set field name.
+    */
+    name: string;
+    /**
+     * Get unwind state.
+     */
+    /**
+    * Set unwind state.
+    */
+    unwind: boolean;
+    /**
      * Get field value.
      */
     /**
     * Set field value.
     */
     value: any;
+    /**
+     * Get checked state.
+     */
+    /**
+    * Set checked state.
+    */
+    checked: boolean;
+    /**
+     * Get default value.
+     */
+    readonly defaultValue: any;
+    /**
+     * Get default checked state.
+     */
+    readonly defaultChecked: boolean;
     /**
      * Get empty state.
      */
@@ -132,4 +159,23 @@ export declare class Template extends Control.Component<Properties> {
      * Field element.
      */
     readonly element: Element;
+    /**
+     * Checks the field validity.
+     * @returns Returns true when the field is valid, false otherwise.
+     */
+    checkValidity(): boolean;
+    /**
+     * Reports the field validity.
+     * @returns Returns true when the field is valid, false otherwise.
+     */
+    reportValidity(): boolean;
+    /**
+     * Set the custom validity error message.
+     * @param error Custom error message.
+     */
+    setCustomValidity(error?: string): void;
+    /**
+     * Reset the field to its initial value and state.
+     */
+    reset(): void;
 }
