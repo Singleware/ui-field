@@ -32,6 +32,10 @@ export interface Properties {
    */
   value?: any;
   /**
+   * Determines whether the field is checked or not.
+   */
+  checked?: boolean;
+  /**
    * Determines whether the field values must be unrolled.
    */
   unwind?: boolean;

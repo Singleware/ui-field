@@ -6,8 +6,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Template_1;
-"use strict";
 /**
  * Copyright (C) 2018 Silas B. Domingos
  * This source code is licensed under the MIT License as described in the file LICENSE.
@@ -18,7 +16,7 @@ const Control = require("@singleware/ui-control");
 /**
  * Field template class.
  */
-let Template = Template_1 = class Template extends Control.Component {
+let Template = class Template extends Control.Component {
     /**
      * Default constructor.
      * @param properties Field properties.
@@ -69,14 +67,14 @@ let Template = Template_1 = class Template extends Control.Component {
   width: 100%;
 }
 :host > .field,
-:host > .field[data-orientation='row'] {
+:host([data-orientation='row']) > .field {
   flex-direction: row;
 }
-:host > .field[data-orientation='row'] > .label {
+:host([data-orientation='row']) > .field > .label {
   display: block;
   align-self: center;
 }
-:host > .field[data-orientation='column'] {
+:host([data-orientation='column']) > .field {
   flex-direction: column;
 }
 :host > .field > .group {
@@ -100,27 +98,17 @@ let Template = Template_1 = class Template extends Control.Component {
         this.assignProperties();
     }
     /**
-     * Updates the empty state into the field element.
+     * Updates the specified property state into the field element.
      * @param field Field element.
+     * @param property Property name.
+     * @param state Property state.
      */
-    updateEmptyState(field) {
-        if (this.empty) {
-            field.dataset.empty = 'on';
+    updatePropertyState(field, property, state) {
+        if (state) {
+            field.dataset[property] = 'on';
         }
         else {
-            delete field.dataset.empty;
-        }
-    }
-    /**
-     * Updates the checked states into the field element.
-     * @param field Field element.
-     */
-    updateCheckedState(field) {
-        if (this.checked) {
-            field.dataset.checked = 'on';
-        }
-        else {
-            delete field.dataset.checked;
+            delete field.dataset[property];
         }
     }
     /**
@@ -129,10 +117,10 @@ let Template = Template_1 = class Template extends Control.Component {
     changeHandler() {
         let field;
         if ((field = Control.getChildByProperty(this.centerSlot, 'value'))) {
-            this.updateEmptyState(field);
+            this.updatePropertyState(field, 'empty', this.empty);
         }
         if ((field = Control.getChildByProperty(this.centerSlot, 'checked'))) {
-            this.updateCheckedState(field);
+            this.updatePropertyState(field, 'checked', this.checked);
         }
     }
     /**
@@ -146,56 +134,58 @@ let Template = Template_1 = class Template extends Control.Component {
      * Bind exposed properties to the custom element.
      */
     bindProperties() {
-        Object.defineProperties(this.skeleton, {
-            label: super.bindDescriptor(this, Template_1.prototype, 'label'),
-            type: super.bindDescriptor(this, Template_1.prototype, 'type'),
-            name: super.bindDescriptor(this, Template_1.prototype, 'name'),
-            unwind: super.bindDescriptor(this, Template_1.prototype, 'unwind'),
-            value: super.bindDescriptor(this, Template_1.prototype, 'value'),
-            checked: super.bindDescriptor(this, Template_1.prototype, 'checked'),
-            defaultValue: super.bindDescriptor(this, Template_1.prototype, 'defaultValue'),
-            defaultChecked: super.bindDescriptor(this, Template_1.prototype, 'defaultChecked'),
-            empty: super.bindDescriptor(this, Template_1.prototype, 'empty'),
-            required: super.bindDescriptor(this, Template_1.prototype, 'required'),
-            readOnly: super.bindDescriptor(this, Template_1.prototype, 'readOnly'),
-            disabled: super.bindDescriptor(this, Template_1.prototype, 'disabled'),
-            orientation: super.bindDescriptor(this, Template_1.prototype, 'orientation'),
-            reportValidity: super.bindDescriptor(this, Template_1.prototype, 'reportValidity'),
-            checkValidity: super.bindDescriptor(this, Template_1.prototype, 'checkValidity'),
-            setCustomValidity: super.bindDescriptor(this, Template_1.prototype, 'setCustomValidity'),
-            reset: super.bindDescriptor(this, Template_1.prototype, 'reset')
-        });
-    }
-    /**
-     * Assign all element properties.
-     */
-    assignProperties() {
-        Control.assignProperties(this, this.properties, [
+        this.bindComponentProperties(this.skeleton, [
             'label',
             'type',
             'name',
             'unwind',
             'value',
             'checked',
+            'defaultValue',
+            'defaultChecked',
+            'empty',
+            'required',
+            'readOnly',
+            'disabled',
+            'orientation',
+            'reportValidity',
+            'checkValidity',
+            'setCustomValidity',
+            'reset'
+        ]);
+    }
+    /**
+     * Assign all element properties.
+     */
+    assignProperties() {
+        this.assignComponentProperties(this.properties, [
+            'label',
+            'type',
+            'name',
+            'value',
+            'checked',
+            'unwind',
             'required',
             'readOnly',
             'disabled'
         ]);
-        this.orientation = this.properties.orientation || 'row';
+        this.orientation = this.properties.orientation || 'column';
         this.changeHandler();
     }
     /**
      * Get field label.
      */
     get label() {
-        const children = this.labelSlot.assignedNodes();
-        return children && children.length ? children[0] : void 0;
+        return this.labelSlot.assignedNodes()[0];
     }
     /**
      * Set field label.
      */
     set label(label) {
-        DOM.append(DOM.clear(this.labelSlot), label);
+        if (this.label) {
+            this.label.remove();
+        }
+        DOM.append(this.skeleton, label);
     }
     /**
      * Get field type.
@@ -246,7 +236,7 @@ let Template = Template_1 = class Template extends Control.Component {
         const field = Control.getChildByProperty(this.centerSlot, 'value');
         if (field) {
             field.value = value;
-            this.updateEmptyState(field);
+            this.updatePropertyState(field, 'empty', this.empty);
         }
     }
     /**
@@ -262,20 +252,22 @@ let Template = Template_1 = class Template extends Control.Component {
         const field = Control.getChildByProperty(this.centerSlot, 'checked');
         if (field) {
             field.checked = state;
-            this.updateCheckedState(field);
+            this.updatePropertyState(field, 'checked', state);
         }
     }
     /**
      * Get default value.
      */
     get defaultValue() {
-        return Control.getChildProperty(this.centerSlot, 'defaultValue');
+        const field = Control.getChildByProperty(this.centerSlot, 'defaultValue');
+        return field ? field.defaultValue : this.properties.value;
     }
     /**
      * Get default checked state.
      */
     get defaultChecked() {
-        return Control.getChildProperty(this.centerSlot, 'defaultChecked');
+        const field = Control.getChildProperty(this.centerSlot, 'defaultChecked');
+        return field ? field.defaultChecked : this.properties.checked;
     }
     /**
      * Get empty state.
@@ -323,13 +315,13 @@ let Template = Template_1 = class Template extends Control.Component {
      * Get orientation mode.
      */
     get orientation() {
-        return this.field.dataset.orientation || 'row';
+        return this.skeleton.dataset.orientation || 'row';
     }
     /**
      * Set orientation mode.
      */
     set orientation(mode) {
-        this.field.dataset.orientation = mode;
+        this.skeleton.dataset.orientation = mode;
     }
     /**
      * Field element.
@@ -407,10 +399,7 @@ __decorate([
 ], Template.prototype, "skeleton", void 0);
 __decorate([
     Class.Private()
-], Template.prototype, "updateEmptyState", null);
-__decorate([
-    Class.Private()
-], Template.prototype, "updateCheckedState", null);
+], Template.prototype, "updatePropertyState", null);
 __decorate([
     Class.Private()
 ], Template.prototype, "changeHandler", null);
@@ -477,7 +466,7 @@ __decorate([
 __decorate([
     Class.Public()
 ], Template.prototype, "reset", null);
-Template = Template_1 = __decorate([
+Template = __decorate([
     Class.Describe()
 ], Template);
 exports.Template = Template;

@@ -42,15 +42,12 @@ export declare class Template extends Control.Component<Properties> {
      */
     private skeleton;
     /**
-     * Updates the empty state into the field element.
+     * Updates the specified property state into the field element.
      * @param field Field element.
+     * @param property Property name.
+     * @param state Property state.
      */
-    private updateEmptyState;
-    /**
-     * Updates the checked states into the field element.
-     * @param field Field element.
-     */
-    private updateCheckedState;
+    private updatePropertyState;
     /**
      * Change event handler.
      */

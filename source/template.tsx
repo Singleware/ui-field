@@ -81,14 +81,14 @@ export class Template extends Control.Component<Properties> {
   width: 100%;
 }
 :host > .field,
-:host > .field[data-orientation='row'] {
+:host([data-orientation='row']) > .field {
   flex-direction: row;
 }
-:host > .field[data-orientation='row'] > .label {
+:host([data-orientation='row']) > .field > .label {
   display: block;
   align-self: center;
 }
-:host > .field[data-orientation='column'] {
+:host([data-orientation='column']) > .field {
   flex-direction: column;
 }
 :host > .field > .group {
@@ -116,28 +116,17 @@ export class Template extends Control.Component<Properties> {
   ) as Element;
 
   /**
-   * Updates the empty state into the field element.
+   * Updates the specified property state into the field element.
    * @param field Field element.
+   * @param property Property name.
+   * @param state Property state.
    */
   @Class.Private()
-  private updateEmptyState(field: HTMLElement): void {
-    if (this.empty) {
-      field.dataset.empty = 'on';
+  private updatePropertyState(field: HTMLElement, property: string, state: boolean): void {
+    if (state) {
+      field.dataset[property] = 'on';
     } else {
-      delete field.dataset.empty;
-    }
-  }
-
-  /**
-   * Updates the checked states into the field element.
-   * @param field Field element.
-   */
-  @Class.Private()
-  private updateCheckedState(field: HTMLElement): void {
-    if (this.checked) {
-      field.dataset.checked = 'on';
-    } else {
-      delete field.dataset.checked;
+      delete field.dataset[property];
     }
   }
 
@@ -148,10 +137,10 @@ export class Template extends Control.Component<Properties> {
   private changeHandler(): void {
     let field;
     if ((field = Control.getChildByProperty(this.centerSlot, 'value'))) {
-      this.updateEmptyState(field);
+      this.updatePropertyState(field, 'empty', this.empty);
     }
     if ((field = Control.getChildByProperty(this.centerSlot, 'checked'))) {
-      this.updateCheckedState(field);
+      this.updatePropertyState(field, 'checked', this.checked);
     }
   }
 
@@ -169,25 +158,25 @@ export class Template extends Control.Component<Properties> {
    */
   @Class.Private()
   private bindProperties(): void {
-    Object.defineProperties(this.skeleton, {
-      label: super.bindDescriptor(this, Template.prototype, 'label'),
-      type: super.bindDescriptor(this, Template.prototype, 'type'),
-      name: super.bindDescriptor(this, Template.prototype, 'name'),
-      unwind: super.bindDescriptor(this, Template.prototype, 'unwind'),
-      value: super.bindDescriptor(this, Template.prototype, 'value'),
-      checked: super.bindDescriptor(this, Template.prototype, 'checked'),
-      defaultValue: super.bindDescriptor(this, Template.prototype, 'defaultValue'),
-      defaultChecked: super.bindDescriptor(this, Template.prototype, 'defaultChecked'),
-      empty: super.bindDescriptor(this, Template.prototype, 'empty'),
-      required: super.bindDescriptor(this, Template.prototype, 'required'),
-      readOnly: super.bindDescriptor(this, Template.prototype, 'readOnly'),
-      disabled: super.bindDescriptor(this, Template.prototype, 'disabled'),
-      orientation: super.bindDescriptor(this, Template.prototype, 'orientation'),
-      reportValidity: super.bindDescriptor(this, Template.prototype, 'reportValidity'),
-      checkValidity: super.bindDescriptor(this, Template.prototype, 'checkValidity'),
-      setCustomValidity: super.bindDescriptor(this, Template.prototype, 'setCustomValidity'),
-      reset: super.bindDescriptor(this, Template.prototype, 'reset')
-    });
+    this.bindComponentProperties(this.skeleton, [
+      'label',
+      'type',
+      'name',
+      'unwind',
+      'value',
+      'checked',
+      'defaultValue',
+      'defaultChecked',
+      'empty',
+      'required',
+      'readOnly',
+      'disabled',
+      'orientation',
+      'reportValidity',
+      'checkValidity',
+      'setCustomValidity',
+      'reset'
+    ]);
   }
 
   /**
@@ -195,18 +184,18 @@ export class Template extends Control.Component<Properties> {
    */
   @Class.Private()
   private assignProperties(): void {
-    Control.assignProperties(this, this.properties, [
+    this.assignComponentProperties(this.properties, [
       'label',
       'type',
       'name',
-      'unwind',
       'value',
       'checked',
+      'unwind',
       'required',
       'readOnly',
       'disabled'
     ]);
-    this.orientation = this.properties.orientation || 'row';
+    this.orientation = this.properties.orientation || 'column';
     this.changeHandler();
   }
 
@@ -228,15 +217,17 @@ export class Template extends Control.Component<Properties> {
    */
   @Class.Public()
   public get label(): any {
-    const children = this.labelSlot.assignedNodes();
-    return children && children.length ? children[0] : void 0;
+    return this.labelSlot.assignedNodes()[0];
   }
 
   /**
    * Set field label.
    */
   public set label(label: any) {
-    DOM.append(DOM.clear(this.labelSlot), label);
+    if (this.label) {
+      this.label.remove();
+    }
+    DOM.append(this.skeleton, label);
   }
 
   /**
@@ -299,7 +290,7 @@ export class Template extends Control.Component<Properties> {
     const field = Control.getChildByProperty(this.centerSlot, 'value') as any;
     if (field) {
       field.value = value;
-      this.updateEmptyState(field);
+      this.updatePropertyState(field, 'empty', this.empty);
     }
   }
 
@@ -318,7 +309,7 @@ export class Template extends Control.Component<Properties> {
     const field = Control.getChildByProperty(this.centerSlot, 'checked') as any;
     if (field) {
       field.checked = state;
-      this.updateCheckedState(field);
+      this.updatePropertyState(field, 'checked', state);
     }
   }
 
@@ -327,7 +318,8 @@ export class Template extends Control.Component<Properties> {
    */
   @Class.Public()
   public get defaultValue(): any {
-    return Control.getChildProperty(this.centerSlot, 'defaultValue');
+    const field = Control.getChildByProperty(this.centerSlot, 'defaultValue') as any;
+    return field ? field.defaultValue : this.properties.value;
   }
 
   /**
@@ -335,7 +327,8 @@ export class Template extends Control.Component<Properties> {
    */
   @Class.Public()
   public get defaultChecked(): boolean {
-    return Control.getChildProperty(this.centerSlot, 'defaultChecked');
+    const field = Control.getChildProperty(this.centerSlot, 'defaultChecked') as any;
+    return field ? field.defaultChecked : this.properties.checked;
   }
 
   /**
@@ -396,14 +389,14 @@ export class Template extends Control.Component<Properties> {
    */
   @Class.Public()
   public get orientation(): string {
-    return this.field.dataset.orientation || 'row';
+    return this.skeleton.dataset.orientation || 'row';
   }
 
   /**
    * Set orientation mode.
    */
   public set orientation(mode: string) {
-    this.field.dataset.orientation = mode;
+    this.skeleton.dataset.orientation = mode;
   }
 
   /**
