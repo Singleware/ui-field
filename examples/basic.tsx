@@ -5,10 +5,10 @@
  * The proposal of this example is to show how to use the basic field template.
  */
 import * as Field from '../source';
-import * as DOM from '@singleware/jsx';
+import * as JSX from '@singleware/jsx';
 
 const field = (
-  <Field.Template>
+  <Field.Component>
     <span slot="label">Select value:</span>
     <span slot="prepend">Before</span>
     <span slot="append">After</span>
@@ -16,7 +16,7 @@ const field = (
       <option value="0">Value A</option>
       <option value="1">Value B</option>
     </select>
-  </Field.Template>
+  </Field.Component>
 ) as Field.Element;
 
 // Change disabled property of the <select> element.
@@ -27,10 +27,6 @@ field.readOnly = true;
 
 // Change required property of the <select> element.
 field.required = true;
-
-// Change type property of the <select>
-// Wait... of course that element could not support type property, try with <input> instead.
-field.type = 'new-type';
 
 // Change name property of the <select> element.
 field.name = 'new-name';

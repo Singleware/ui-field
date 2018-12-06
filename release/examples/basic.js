@@ -7,23 +7,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * The proposal of this example is to show how to use the basic field template.
  */
 const Field = require("../source");
-const DOM = require("@singleware/jsx");
-const field = (DOM.create(Field.Template, null,
-    DOM.create("span", { slot: "label" }, "Select value:"),
-    DOM.create("span", { slot: "prepend" }, "Before"),
-    DOM.create("span", { slot: "append" }, "After"),
-    DOM.create("select", { slot: "center" },
-        DOM.create("option", { value: "0" }, "Value A"),
-        DOM.create("option", { value: "1" }, "Value B"))));
+const JSX = require("@singleware/jsx");
+const field = (JSX.create(Field.Component, null,
+    JSX.create("span", { slot: "label" }, "Select value:"),
+    JSX.create("span", { slot: "prepend" }, "Before"),
+    JSX.create("span", { slot: "append" }, "After"),
+    JSX.create("select", { slot: "center" },
+        JSX.create("option", { value: "0" }, "Value A"),
+        JSX.create("option", { value: "1" }, "Value B"))));
 // Change disabled property of the <select> element.
 field.disabled = true;
 // Change read-only property of the <select> element.
 field.readOnly = true;
 // Change required property of the <select> element.
 field.required = true;
-// Change type property of the <select>
-// Wait... of course that element could not support type property, try with <input> instead.
-field.type = 'new-type';
 // Change name property of the <select> element.
 field.name = 'new-name';
 // Change value property of the <select> element.

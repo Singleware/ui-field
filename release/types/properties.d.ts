@@ -20,7 +20,7 @@ export interface Properties {
    */
   label?: string;
   /**
-   * Field type.
+   * Field name.
    */
   type?: string;
   /**
@@ -35,10 +35,6 @@ export interface Properties {
    * Determines whether the field is checked or not.
    */
   checked?: boolean;
-  /**
-   * Determines whether the field values must be unrolled.
-   */
-  unwind?: boolean;
   /**
    * Determines whether the field is required or not.
    */
