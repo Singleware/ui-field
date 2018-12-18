@@ -56,7 +56,10 @@ export class Element extends HTMLElement {
   @Class.Private()
   private fieldStyles = (
     <style>
-      {`:host > .field {
+      {`:host {
+  display: block;
+}
+:host > .field {
   display: flex;
   width: 100%;
 }
@@ -160,13 +163,9 @@ export class Element extends HTMLElement {
   constructor() {
     super();
     const shadow = JSX.append(this.attachShadow({ mode: 'closed' }), this.fieldStyles, this.fieldLayout) as ShadowRoot;
-    const options = { capture: true, passive: true };
-    const callback = this.changeHandler.bind(this);
-    shadow.addEventListener('slotchange', callback, options);
-    shadow.addEventListener('focus', callback, options);
-    shadow.addEventListener('keyup', callback, options);
-    shadow.addEventListener('change', callback, options);
-    shadow.addEventListener('blur', callback, options);
+    shadow.addEventListener('slotchange', this.changeHandler.bind(this));
+    shadow.addEventListener('keyup', this.changeHandler.bind(this));
+    shadow.addEventListener('change', this.changeHandler.bind(this));
   }
 
   /**
@@ -175,10 +174,10 @@ export class Element extends HTMLElement {
   @Class.Public()
   public get empty(): boolean {
     const child = this.getChildElement(this.centerSlot) as any;
-    if ('empty' in child) {
-      return child.empty;
+    if (!('empty' in child)) {
+      return child.value === void 0 || ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0);
     }
-    return child.value === void 0 || ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0);
+    return child.empty;
   }
 
   /**
@@ -376,6 +375,7 @@ export class Element extends HTMLElement {
         child.checked = child.defaultChecked;
       }
     }
+    this.changeHandler();
   }
 
   /**

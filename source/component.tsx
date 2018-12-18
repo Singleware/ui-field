@@ -18,7 +18,24 @@ export class Component<T extends Properties = Properties> extends Control.Compon
    * Element instance.
    */
   @Class.Private()
-  private skeleton = <swe-field {...this.properties}>{this.children}</swe-field> as Element;
+  private skeleton = (
+    <swe-field
+      class={this.properties.class}
+      slot={this.properties.slot}
+      label={this.properties.label}
+      type={this.properties.type}
+      name={this.properties.name}
+      value={this.properties.value}
+      checked={this.properties.checked}
+      required={this.properties.required}
+      readOnly={this.properties.readOnly}
+      disabled={this.properties.disabled}
+      orientation={this.properties.orientation}
+      onChange={this.properties.onChange}
+    >
+      {this.children}
+    </swe-field>
+  ) as Element;
 
   /**
    * Gets the element.

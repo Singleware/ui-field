@@ -4,11 +4,11 @@ Custom HTML element used to mirror field properties into the first element in it
 
 ### State Attributes
 
-| Name    | Description                                                |
-| ------- | ---------------------------------------------------------- |
-| empty   | Automatic assigned when the center slot element is empty   |
-| checked | Automatic assigned when the center slot element is checked |
-| invalid | Automatic assigned when the center slot element is invalid |
+| Name    | Description                                                    |
+| ------- | -------------------------------------------------------------- |
+| empty   | Automatically assigned when the center slot element is empty   |
+| checked | Automatically assigned when the center slot element is checked |
+| invalid | Automatically assigned when the center slot element is invalid |
 
 ### Mirrored Properties
 
@@ -40,6 +40,21 @@ Custom HTML element used to mirror field properties into the first element in it
 | reset             | Reset the current value from the center slot element to its default value |
 | checkValidity     | Get the validity of the center slot element                               |
 | setCustomValidity | Set a custom validity in the center slot element                          |
+
+### Slots
+
+| Name    | Description                                                              |
+| ------- | ------------------------------------------------------------------------ |
+| label   | Element to shows the field label                                         |
+| prepend | Element to show things before the center slot, like: icons, buttons, etc |
+| center  | Element to show the field target, like: inputs, selects, etc             |
+| append  | Element to show things after the center slot, like: icons, buttons, etc  |
+
+### Events
+
+| Name   | Description                          |
+| ------ | ------------------------------------ |
+| change | Dispatched when the field is changed |
 
 ## Install
 

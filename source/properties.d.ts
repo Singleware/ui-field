@@ -55,4 +55,8 @@ export interface Properties {
    * Field children.
    */
   children?: {};
+  /**
+   * Change event.
+   */
+  onChange?: (event: Event) => void;
 }

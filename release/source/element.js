@@ -49,7 +49,10 @@ let Element = class Element extends HTMLElement {
         /**
          * Field styles element.
          */
-        this.fieldStyles = (JSX.create("style", null, `:host > .field {
+        this.fieldStyles = (JSX.create("style", null, `:host {
+  display: block;
+}
+:host > .field {
   display: flex;
   width: 100%;
 }
@@ -76,13 +79,9 @@ let Element = class Element extends HTMLElement {
   flex-grow: 0;
 }`));
         const shadow = JSX.append(this.attachShadow({ mode: 'closed' }), this.fieldStyles, this.fieldLayout);
-        const options = { capture: true, passive: true };
-        const callback = this.changeHandler.bind(this);
-        shadow.addEventListener('slotchange', callback, options);
-        shadow.addEventListener('focus', callback, options);
-        shadow.addEventListener('keyup', callback, options);
-        shadow.addEventListener('change', callback, options);
-        shadow.addEventListener('blur', callback, options);
+        shadow.addEventListener('slotchange', this.changeHandler.bind(this));
+        shadow.addEventListener('keyup', this.changeHandler.bind(this));
+        shadow.addEventListener('change', this.changeHandler.bind(this));
     }
     /**
      * Gets the first child element from specified slot element.
@@ -149,10 +148,10 @@ let Element = class Element extends HTMLElement {
      */
     get empty() {
         const child = this.getChildElement(this.centerSlot);
-        if ('empty' in child) {
-            return child.empty;
+        if (!('empty' in child)) {
+            return child.value === void 0 || ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0);
         }
-        return child.value === void 0 || ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0);
+        return child.empty;
     }
     /**
      * Gets the element label.
@@ -314,6 +313,7 @@ let Element = class Element extends HTMLElement {
                 child.checked = child.defaultChecked;
             }
         }
+        this.changeHandler();
     }
     /**
      * Checks the element validity.
