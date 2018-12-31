@@ -1,7 +1,16 @@
+import * as Control from '@singleware/ui-control';
 /**
  * Field element.
  */
-export declare class Element extends HTMLElement {
+export declare class Element extends Control.Element {
+    /**
+     * Element styles.
+     */
+    private styles;
+    /**
+     * Current label content.
+     */
+    private currentLabel;
     /**
      * Label slot element.
      */
@@ -27,36 +36,6 @@ export declare class Element extends HTMLElement {
      */
     private fieldStyles;
     /**
-     * Gets the first child element from specified slot element.
-     * @param slot Slot element.
-     * @throws Throws an error when there are no children in the specified slot.
-     * @returns Returns the first child element.
-     */
-    private getChildElement;
-    /**
-     * Sets the property into the first child from specified slot element.
-     * @param slot Slot element.
-     * @param property Property name.
-     * @param value Property value.
-     * @throws Throws an error when there are no children in the specified slot.
-     * @returns Returns true when the specified property has been assigned, false otherwise.
-     */
-    private setChildProperty;
-    /**
-     * Gets the property from the first child in the specified slot element.
-     * @param slot Slot element.
-     * @param property Property name.
-     * @returns Returns the property value.
-     * @throws Throws an error when there are no children in the specified slot.
-     */
-    private getChildProperty;
-    /**
-     * Updates the specified state in the element.
-     * @param name State name.
-     * @param state State value.
-     */
-    private updateState;
-    /**
      * Change event handler.
      */
     private changeHandler;
@@ -69,10 +48,10 @@ export declare class Element extends HTMLElement {
      */
     readonly empty: boolean;
     /**
-     * Gets the element label.
+     * Gets the label.
      */
     /**
-    * Sets the element label.
+    * Sets the label.
     */
     label: any;
     /**

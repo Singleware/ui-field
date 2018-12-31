@@ -4,13 +4,28 @@
  */
 import * as Class from '@singleware/class';
 import * as JSX from '@singleware/jsx';
+import * as Control from '@singleware/ui-control';
+
+import { Stylesheet } from './stylesheet';
 
 /**
  * Field element.
  */
 @JSX.Describe('swe-field')
 @Class.Describe()
-export class Element extends HTMLElement {
+export class Element extends Control.Element {
+  /**
+   * Element styles.
+   */
+  @Class.Private()
+  private styles = new Stylesheet();
+
+  /**
+   * Current label content.
+   */
+  @Class.Private()
+  private currentLabel: any;
+
   /**
    * Label slot element.
    */
@@ -54,107 +69,16 @@ export class Element extends HTMLElement {
    * Field styles element.
    */
   @Class.Private()
-  private fieldStyles = (
-    <style>
-      {`:host {
-  display: block;
-}
-:host > .field {
-  display: flex;
-  width: 100%;
-}
-:host([orientation='row']) > .field {
-  flex-direction: row;
-}
-:host([orientation='row']) > .field > .label {
-  display: block;
-  align-self: center;
-}
-:host > .field,
-:host([orientation='column']) > .field {
-  flex-direction: column;
-}
-:host > .field > .group {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: inherit;
-}
-:host > .field > .group > .prepend,
-:host > .field > .group > .append {
-  flex-shrink: 0;
-  flex-grow: 0;
-}`}
-    </style>
-  ) as HTMLStyleElement;
-
-  /**
-   * Gets the first child element from specified slot element.
-   * @param slot Slot element.
-   * @throws Throws an error when there are no children in the specified slot.
-   * @returns Returns the first child element.
-   */
-  @Class.Private()
-  private getChildElement(slot: HTMLSlotElement): HTMLElement {
-    const child = slot.assignedNodes()[0];
-    if (!child) {
-      throw new Error(`There are no children in the '${slot.name}' slot.`);
-    }
-    return child as HTMLElement;
-  }
-
-  /**
-   * Sets the property into the first child from specified slot element.
-   * @param slot Slot element.
-   * @param property Property name.
-   * @param value Property value.
-   * @throws Throws an error when there are no children in the specified slot.
-   * @returns Returns true when the specified property has been assigned, false otherwise.
-   */
-  @Class.Private()
-  private setChildProperty(slot: HTMLSlotElement, property: string, value: any): boolean {
-    const child = this.getChildElement(slot) as any;
-    if (property in child) {
-      child[property] = value;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Gets the property from the first child in the specified slot element.
-   * @param slot Slot element.
-   * @param property Property name.
-   * @returns Returns the property value.
-   * @throws Throws an error when there are no children in the specified slot.
-   */
-  @Class.Private()
-  private getChildProperty(slot: HTMLSlotElement, property: string): any {
-    return (this.getChildElement(slot) as any)[property];
-  }
-
-  /**
-   * Updates the specified state in the element.
-   * @param name State name.
-   * @param state State value.
-   */
-  @Class.Private()
-  private updateState(name: string, state: boolean): void {
-    if (state) {
-      this.setAttribute(name, '');
-    } else {
-      this.removeAttribute(name);
-    }
-  }
+  private fieldStyles = <style type="text/css">{this.styles.toString()}</style> as HTMLStyleElement;
 
   /**
    * Change event handler.
    */
   @Class.Private()
   private changeHandler(): void {
-    this.updateState('empty', this.empty);
-    this.updateState('checked', this.checked);
-    this.updateState('invalid', !this.empty && !this.checkValidity());
+    this.updatePropertyState('empty', this.empty);
+    this.updatePropertyState('checked', this.checked);
+    this.updatePropertyState('invalid', !this.empty && !this.checkValidity());
   }
 
   /**
@@ -173,7 +97,7 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public get empty(): boolean {
-    const child = this.getChildElement(this.centerSlot) as any;
+    const child = this.getRequiredChildElement(this.centerSlot) as any;
     if (!('empty' in child)) {
       return child.value === void 0 || ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0);
     }
@@ -181,21 +105,21 @@ export class Element extends HTMLElement {
   }
 
   /**
-   * Gets the element label.
+   * Gets the label.
    */
   @Class.Public()
   public get label(): any {
-    return this.labelSlot.assignedNodes()[0];
+    return this.currentLabel;
   }
 
   /**
-   * Sets the element label.
+   * Sets the label.
    */
   public set label(label: any) {
-    if (this.label) {
-      this.label.remove();
+    const child = this.labelSlot.assignedNodes()[0] as HTMLElement;
+    if (child) {
+      JSX.append(JSX.clear(child), (this.currentLabel = label));
     }
-    JSX.append(this, label);
   }
 
   /**
@@ -203,14 +127,14 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public get type(): string {
-    return this.getChildProperty(this.centerSlot, 'type');
+    return this.getRequiredChildProperty(this.centerSlot, 'type');
   }
 
   /**
    * Sets the element type.
    */
   public set type(type: string) {
-    this.setChildProperty(this.centerSlot, 'type', type);
+    this.setRequiredChildProperty(this.centerSlot, 'type', type);
   }
 
   /**
@@ -218,14 +142,14 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public get name(): string {
-    return this.getChildProperty(this.centerSlot, 'name');
+    return this.getRequiredChildProperty(this.centerSlot, 'name');
   }
 
   /**
    * Sets the element name.
    */
   public set name(name: string) {
-    this.setChildProperty(this.centerSlot, 'name', name);
+    this.setRequiredChildProperty(this.centerSlot, 'name', name);
   }
 
   /**
@@ -233,14 +157,14 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public get value(): any {
-    return this.getChildProperty(this.centerSlot, 'value');
+    return this.getRequiredChildProperty(this.centerSlot, 'value');
   }
 
   /**
    * Sets the element value.
    */
   public set value(value: any) {
-    this.setChildProperty(this.centerSlot, 'value', value);
+    this.setRequiredChildProperty(this.centerSlot, 'value', value);
   }
 
   /**
@@ -248,14 +172,14 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public get checked(): boolean {
-    return Boolean(this.getChildProperty(this.centerSlot, 'checked'));
+    return Boolean(this.getRequiredChildProperty(this.centerSlot, 'checked'));
   }
 
   /**
    * Sets the checked state of the element.
    */
   public set checked(value: boolean) {
-    this.setChildProperty(this.centerSlot, 'checked', Boolean(value));
+    this.setRequiredChildProperty(this.centerSlot, 'checked', Boolean(value));
   }
 
   /**
@@ -263,14 +187,14 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public get defaultValue(): any {
-    return this.getChildProperty(this.centerSlot, 'defaultValue');
+    return this.getRequiredChildProperty(this.centerSlot, 'defaultValue');
   }
 
   /**
    * Sets the default value of the element.
    */
   public set defaultValue(value: any) {
-    this.setChildProperty(this.centerSlot, 'defaultValue', value);
+    this.setRequiredChildProperty(this.centerSlot, 'defaultValue', value);
   }
 
   /**
@@ -278,14 +202,14 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public get defaultChecked(): boolean {
-    return Boolean(this.getChildProperty(this.centerSlot, 'defaultChecked'));
+    return Boolean(this.getRequiredChildProperty(this.centerSlot, 'defaultChecked'));
   }
 
   /**
    * Sets the default checked state of the element.
    */
   public set defaultChecked(value: boolean) {
-    this.setChildProperty(this.centerSlot, 'defaultChecked', Boolean(value));
+    this.setRequiredChildProperty(this.centerSlot, 'defaultChecked', Boolean(value));
   }
 
   /**
@@ -300,7 +224,7 @@ export class Element extends HTMLElement {
    * Sets the required state of the element.
    */
   public set required(state: boolean) {
-    this.updateState('required', this.setChildProperty(this.centerSlot, 'required', state) && state);
+    this.updatePropertyState('required', this.setRequiredChildProperty(this.centerSlot, 'required', state) && state);
   }
 
   /**
@@ -315,7 +239,7 @@ export class Element extends HTMLElement {
    * Sets the read-only state of the element.
    */
   public set readOnly(state: boolean) {
-    this.updateState('readonly', this.setChildProperty(this.centerSlot, 'readOnly', state) && state);
+    this.updatePropertyState('readonly', this.setRequiredChildProperty(this.centerSlot, 'readOnly', state) && state);
   }
 
   /**
@@ -330,7 +254,7 @@ export class Element extends HTMLElement {
    * Sets the disabled state of the element.
    */
   public set disabled(state: boolean) {
-    this.updateState('disabled', this.setChildProperty(this.centerSlot, 'disabled', state) && state);
+    this.updatePropertyState('disabled', this.setRequiredChildProperty(this.centerSlot, 'disabled', state) && state);
   }
 
   /**
@@ -353,10 +277,7 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public focus(): void {
-    const child = this.getChildElement(this.centerSlot) as any;
-    if (child.focus instanceof Function) {
-      child.focus();
-    }
+    this.callRequiredChildMethod(this.centerSlot, 'focus', []);
   }
 
   /**
@@ -364,7 +285,7 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public reset(): void {
-    const child = this.getChildElement(this.centerSlot) as any;
+    const child = this.getRequiredChildElement(this.centerSlot) as any;
     if (child.reset instanceof Function) {
       child.reset();
     } else {
@@ -384,8 +305,7 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public checkValidity(): boolean {
-    const child = this.getChildElement(this.centerSlot) as any;
-    return !(child.checkValidity instanceof Function) || child.checkValidity();
+    return this.callRequiredChildMethod(this.centerSlot, 'checkValidity', []) !== false;
   }
 
   /**
@@ -394,9 +314,6 @@ export class Element extends HTMLElement {
    */
   @Class.Public()
   public setCustomValidity(error?: string): void {
-    const child = this.getChildElement(this.centerSlot) as any;
-    if (child.setCustomValidity instanceof Function) {
-      child.setCustomValidity(error);
-    }
+    this.callRequiredChildMethod(this.centerSlot, 'setCustomValidity', [error]);
   }
 }

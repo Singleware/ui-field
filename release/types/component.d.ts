@@ -14,10 +14,10 @@ export declare class Component<T extends Properties = Properties> extends Contro
      */
     readonly element: Element;
     /**
-     * Gets the element label.
+     * Gets the label.
      */
     /**
-    * Sets the element label.
+    * Sets the label.
     */
     label: any;
     /**

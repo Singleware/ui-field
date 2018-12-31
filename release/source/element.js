@@ -12,15 +12,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const Class = require("@singleware/class");
 const JSX = require("@singleware/jsx");
+const Control = require("@singleware/ui-control");
+const stylesheet_1 = require("./stylesheet");
 /**
  * Field element.
  */
-let Element = class Element extends HTMLElement {
+let Element = class Element extends Control.Element {
     /**
      * Default constructor.
      */
     constructor() {
         super();
+        /**
+         * Element styles.
+         */
+        this.styles = new stylesheet_1.Stylesheet();
         /**
          * Label slot element.
          */
@@ -49,196 +55,116 @@ let Element = class Element extends HTMLElement {
         /**
          * Field styles element.
          */
-        this.fieldStyles = (JSX.create("style", null, `:host {
-  display: block;
-}
-:host > .field {
-  display: flex;
-  width: 100%;
-}
-:host([orientation='row']) > .field {
-  flex-direction: row;
-}
-:host([orientation='row']) > .field > .label {
-  display: block;
-  align-self: center;
-}
-:host > .field,
-:host([orientation='column']) > .field {
-  flex-direction: column;
-}
-:host > .field > .group {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: inherit;
-}
-:host > .field > .group > .prepend,
-:host > .field > .group > .append {
-  flex-shrink: 0;
-  flex-grow: 0;
-}`));
+        this.fieldStyles = JSX.create("style", { type: "text/css" }, this.styles.toString());
         const shadow = JSX.append(this.attachShadow({ mode: 'closed' }), this.fieldStyles, this.fieldLayout);
         shadow.addEventListener('slotchange', this.changeHandler.bind(this));
         shadow.addEventListener('keyup', this.changeHandler.bind(this));
         shadow.addEventListener('change', this.changeHandler.bind(this));
     }
     /**
-     * Gets the first child element from specified slot element.
-     * @param slot Slot element.
-     * @throws Throws an error when there are no children in the specified slot.
-     * @returns Returns the first child element.
-     */
-    getChildElement(slot) {
-        const child = slot.assignedNodes()[0];
-        if (!child) {
-            throw new Error(`There are no children in the '${slot.name}' slot.`);
-        }
-        return child;
-    }
-    /**
-     * Sets the property into the first child from specified slot element.
-     * @param slot Slot element.
-     * @param property Property name.
-     * @param value Property value.
-     * @throws Throws an error when there are no children in the specified slot.
-     * @returns Returns true when the specified property has been assigned, false otherwise.
-     */
-    setChildProperty(slot, property, value) {
-        const child = this.getChildElement(slot);
-        if (property in child) {
-            child[property] = value;
-            return true;
-        }
-        return false;
-    }
-    /**
-     * Gets the property from the first child in the specified slot element.
-     * @param slot Slot element.
-     * @param property Property name.
-     * @returns Returns the property value.
-     * @throws Throws an error when there are no children in the specified slot.
-     */
-    getChildProperty(slot, property) {
-        return this.getChildElement(slot)[property];
-    }
-    /**
-     * Updates the specified state in the element.
-     * @param name State name.
-     * @param state State value.
-     */
-    updateState(name, state) {
-        if (state) {
-            this.setAttribute(name, '');
-        }
-        else {
-            this.removeAttribute(name);
-        }
-    }
-    /**
      * Change event handler.
      */
     changeHandler() {
-        this.updateState('empty', this.empty);
-        this.updateState('checked', this.checked);
-        this.updateState('invalid', !this.empty && !this.checkValidity());
+        this.updatePropertyState('empty', this.empty);
+        this.updatePropertyState('checked', this.checked);
+        this.updatePropertyState('invalid', !this.empty && !this.checkValidity());
     }
     /**
      * Determines whether the element is empty or not.
      */
     get empty() {
-        const child = this.getChildElement(this.centerSlot);
+        const child = this.getRequiredChildElement(this.centerSlot);
         if (!('empty' in child)) {
             return child.value === void 0 || ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0);
         }
         return child.empty;
     }
     /**
-     * Gets the element label.
+     * Gets the label.
      */
     get label() {
-        return this.labelSlot.assignedNodes()[0];
+        return this.currentLabel;
     }
     /**
-     * Sets the element label.
+     * Sets the label.
      */
     set label(label) {
-        if (this.label) {
-            this.label.remove();
+        const child = this.labelSlot.assignedNodes()[0];
+        if (child) {
+            JSX.append(JSX.clear(child), (this.currentLabel = label));
         }
-        JSX.append(this, label);
     }
     /**
      * Gets the element type.
      */
     get type() {
-        return this.getChildProperty(this.centerSlot, 'type');
+        return this.getRequiredChildProperty(this.centerSlot, 'type');
     }
     /**
      * Sets the element type.
      */
     set type(type) {
-        this.setChildProperty(this.centerSlot, 'type', type);
+        this.setRequiredChildProperty(this.centerSlot, 'type', type);
     }
     /**
      * Gets the element name.
      */
     get name() {
-        return this.getChildProperty(this.centerSlot, 'name');
+        return this.getRequiredChildProperty(this.centerSlot, 'name');
     }
     /**
      * Sets the element name.
      */
     set name(name) {
-        this.setChildProperty(this.centerSlot, 'name', name);
+        this.setRequiredChildProperty(this.centerSlot, 'name', name);
     }
     /**
      * Gets the element value.
      */
     get value() {
-        return this.getChildProperty(this.centerSlot, 'value');
+        return this.getRequiredChildProperty(this.centerSlot, 'value');
     }
     /**
      * Sets the element value.
      */
     set value(value) {
-        this.setChildProperty(this.centerSlot, 'value', value);
+        this.setRequiredChildProperty(this.centerSlot, 'value', value);
     }
     /**
      * Gets the checked state of the element.
      */
     get checked() {
-        return Boolean(this.getChildProperty(this.centerSlot, 'checked'));
+        return Boolean(this.getRequiredChildProperty(this.centerSlot, 'checked'));
     }
     /**
      * Sets the checked state of the element.
      */
     set checked(value) {
-        this.setChildProperty(this.centerSlot, 'checked', Boolean(value));
+        this.setRequiredChildProperty(this.centerSlot, 'checked', Boolean(value));
     }
     /**
      * Gets the default value of the element.
      */
     get defaultValue() {
-        return this.getChildProperty(this.centerSlot, 'defaultValue');
+        return this.getRequiredChildProperty(this.centerSlot, 'defaultValue');
     }
     /**
      * Sets the default value of the element.
      */
     set defaultValue(value) {
-        this.setChildProperty(this.centerSlot, 'defaultValue', value);
+        this.setRequiredChildProperty(this.centerSlot, 'defaultValue', value);
     }
     /**
      * Gets the default checked state of the element.
      */
     get defaultChecked() {
-        return Boolean(this.getChildProperty(this.centerSlot, 'defaultChecked'));
+        return Boolean(this.getRequiredChildProperty(this.centerSlot, 'defaultChecked'));
     }
     /**
      * Sets the default checked state of the element.
      */
     set defaultChecked(value) {
-        this.setChildProperty(this.centerSlot, 'defaultChecked', Boolean(value));
+        this.setRequiredChildProperty(this.centerSlot, 'defaultChecked', Boolean(value));
     }
     /**
      * Gets the required state of the element.
@@ -250,7 +176,7 @@ let Element = class Element extends HTMLElement {
      * Sets the required state of the element.
      */
     set required(state) {
-        this.updateState('required', this.setChildProperty(this.centerSlot, 'required', state) && state);
+        this.updatePropertyState('required', this.setRequiredChildProperty(this.centerSlot, 'required', state) && state);
     }
     /**
      * Gets the read-only state of the element.
@@ -262,7 +188,7 @@ let Element = class Element extends HTMLElement {
      * Sets the read-only state of the element.
      */
     set readOnly(state) {
-        this.updateState('readonly', this.setChildProperty(this.centerSlot, 'readOnly', state) && state);
+        this.updatePropertyState('readonly', this.setRequiredChildProperty(this.centerSlot, 'readOnly', state) && state);
     }
     /**
      * Gets the disabled state of the element.
@@ -274,7 +200,7 @@ let Element = class Element extends HTMLElement {
      * Sets the disabled state of the element.
      */
     set disabled(state) {
-        this.updateState('disabled', this.setChildProperty(this.centerSlot, 'disabled', state) && state);
+        this.updatePropertyState('disabled', this.setRequiredChildProperty(this.centerSlot, 'disabled', state) && state);
     }
     /**
      * Gets the element orientation.
@@ -292,16 +218,13 @@ let Element = class Element extends HTMLElement {
      * Move the focus to this element.
      */
     focus() {
-        const child = this.getChildElement(this.centerSlot);
-        if (child.focus instanceof Function) {
-            child.focus();
-        }
+        this.callRequiredChildMethod(this.centerSlot, 'focus', []);
     }
     /**
      * Reset the element value to its initial value.
      */
     reset() {
-        const child = this.getChildElement(this.centerSlot);
+        const child = this.getRequiredChildElement(this.centerSlot);
         if (child.reset instanceof Function) {
             child.reset();
         }
@@ -320,20 +243,22 @@ let Element = class Element extends HTMLElement {
      * @returns Returns true when the element is valid, false otherwise.
      */
     checkValidity() {
-        const child = this.getChildElement(this.centerSlot);
-        return !(child.checkValidity instanceof Function) || child.checkValidity();
+        return this.callRequiredChildMethod(this.centerSlot, 'checkValidity', []) !== false;
     }
     /**
      * Set the element custom validity error message.
      * @param error Custom error message.
      */
     setCustomValidity(error) {
-        const child = this.getChildElement(this.centerSlot);
-        if (child.setCustomValidity instanceof Function) {
-            child.setCustomValidity(error);
-        }
+        this.callRequiredChildMethod(this.centerSlot, 'setCustomValidity', [error]);
     }
 };
+__decorate([
+    Class.Private()
+], Element.prototype, "styles", void 0);
+__decorate([
+    Class.Private()
+], Element.prototype, "currentLabel", void 0);
 __decorate([
     Class.Private()
 ], Element.prototype, "labelSlot", void 0);
@@ -352,18 +277,6 @@ __decorate([
 __decorate([
     Class.Private()
 ], Element.prototype, "fieldStyles", void 0);
-__decorate([
-    Class.Private()
-], Element.prototype, "getChildElement", null);
-__decorate([
-    Class.Private()
-], Element.prototype, "setChildProperty", null);
-__decorate([
-    Class.Private()
-], Element.prototype, "getChildProperty", null);
-__decorate([
-    Class.Private()
-], Element.prototype, "updateState", null);
 __decorate([
     Class.Private()
 ], Element.prototype, "changeHandler", null);

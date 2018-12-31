@@ -34,13 +34,13 @@ let Component = class Component extends Control.Component {
         return this.skeleton;
     }
     /**
-     * Gets the element label.
+     * Gets the label.
      */
     get label() {
         return this.skeleton.label;
     }
     /**
-     * Sets the element label.
+     * Sets the label.
      */
     set label(label) {
         this.skeleton.label = label;

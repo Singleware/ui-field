@@ -46,7 +46,7 @@ export class Component<T extends Properties = Properties> extends Control.Compon
   }
 
   /**
-   * Gets the element label.
+   * Gets the label.
    */
   @Class.Public()
   public get label(): any {
@@ -54,7 +54,7 @@ export class Component<T extends Properties = Properties> extends Control.Compon
   }
 
   /**
-   * Sets the element label.
+   * Sets the label.
    */
   public set label(label: any) {
     this.skeleton.label = label;
