@@ -38,6 +38,18 @@ export class Component<T extends Properties = Properties> extends Control.Compon
   ) as Element;
 
   /**
+   * Default constructor.
+   * @param properties Initial properties.
+   * @param children Initial children.
+   */
+  constructor(properties?: T, children?: any[]) {
+    super(properties, children);
+    if (this.properties.data) {
+      this.data = this.properties.data;
+    }
+  }
+
+  /**
    * Gets the element.
    */
   @Class.Public()
@@ -216,6 +228,26 @@ export class Component<T extends Properties = Properties> extends Control.Compon
    */
   public set orientation(orientation: string) {
     this.skeleton.orientation = orientation;
+  }
+
+  /**
+   * Gets the element data.
+   */
+  @Class.Public()
+  public get data(): DOMStringMap {
+    return this.skeleton.dataset;
+  }
+
+  /**
+   * Sets the element data.
+   */
+  public set data(data: DOMStringMap) {
+    for (const key in this.skeleton.dataset) {
+      delete this.skeleton.dataset[key];
+    }
+    for (const key in data) {
+      this.skeleton.dataset[key] = data[key];
+    }
   }
 
   /**

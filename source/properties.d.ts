@@ -52,6 +52,10 @@ export interface Properties {
    */
   orientation?: string;
   /**
+   * Field data.
+   */
+  data?: DOMStringMap;
+  /**
    * Field children.
    */
   children?: {};

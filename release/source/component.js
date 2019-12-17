@@ -18,14 +18,19 @@ const Control = require("@singleware/ui-control");
  */
 let Component = class Component extends Control.Component {
     /**
-     * Field component class.
+     * Default constructor.
+     * @param properties Initial properties.
+     * @param children Initial children.
      */
-    constructor() {
-        super(...arguments);
+    constructor(properties, children) {
+        super(properties, children);
         /**
          * Element instance.
          */
         this.skeleton = (JSX.create("swe-field", { class: this.properties.class, slot: this.properties.slot, label: this.properties.label, type: this.properties.type, name: this.properties.name, value: this.properties.value, checked: this.properties.checked, required: this.properties.required, readOnly: this.properties.readOnly, disabled: this.properties.disabled, orientation: this.properties.orientation, onChange: this.properties.onChange }, this.children));
+        if (this.properties.data) {
+            this.data = this.properties.data;
+        }
     }
     /**
      * Gets the element.
@@ -172,6 +177,23 @@ let Component = class Component extends Control.Component {
         this.skeleton.orientation = orientation;
     }
     /**
+     * Gets the element data.
+     */
+    get data() {
+        return this.skeleton.dataset;
+    }
+    /**
+     * Sets the element data.
+     */
+    set data(data) {
+        for (const key in this.skeleton.dataset) {
+            delete this.skeleton.dataset[key];
+        }
+        for (const key in data) {
+            this.skeleton.dataset[key] = data[key];
+        }
+    }
+    /**
      * Move the focus to this element.
      */
     focus() {
@@ -240,6 +262,9 @@ __decorate([
 __decorate([
     Class.Public()
 ], Component.prototype, "orientation", null);
+__decorate([
+    Class.Public()
+], Component.prototype, "data", null);
 __decorate([
     Class.Public()
 ], Component.prototype, "focus", null);
