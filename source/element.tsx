@@ -30,25 +30,25 @@ export class Element extends Control.Element {
    * Label slot element.
    */
   @Class.Private()
-  private labelSlot = <slot name="label" class="label" /> as HTMLSlotElement;
+  private labelSlot = (<slot name="label" class="label" />) as HTMLSlotElement;
 
   /**
    * Prepend slot element.
    */
   @Class.Private()
-  private prependSlot = <slot name="prepend" class="prepend" /> as HTMLSlotElement;
+  private prependSlot = (<slot name="prepend" class="prepend" />) as HTMLSlotElement;
 
   /**
    * Center slot element.
    */
   @Class.Private()
-  private centerSlot = <slot name="center" class="center" /> as HTMLSlotElement;
+  private centerSlot = (<slot name="center" class="center" />) as HTMLSlotElement;
 
   /**
    * Append slot element.
    */
   @Class.Private()
-  private appendSlot = <slot name="append" class="append" /> as HTMLSlotElement;
+  private appendSlot = (<slot name="append" class="append" />) as HTMLSlotElement;
 
   /**
    * Field layout element.
@@ -69,7 +69,7 @@ export class Element extends Control.Element {
    * Field styles element.
    */
   @Class.Private()
-  private fieldStyles = <style type="text/css">{this.styles.toString()}</style> as HTMLStyleElement;
+  private fieldStyles = (<style type="text/css">{this.styles.toString()}</style>) as HTMLStyleElement;
 
   /**
    * Change event handler.
@@ -99,7 +99,10 @@ export class Element extends Control.Element {
   public get empty(): boolean {
     const child = this.getRequiredChildElement(this.centerSlot) as any;
     if (!('empty' in child)) {
-      return child.value === void 0 || ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0);
+      return (
+        child.value === void 0 ||
+        ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0)
+      );
     }
     return child.empty;
   }

@@ -30,19 +30,19 @@ let Element = class Element extends Control.Element {
         /**
          * Label slot element.
          */
-        this.labelSlot = JSX.create("slot", { name: "label", class: "label" });
+        this.labelSlot = (JSX.create("slot", { name: "label", class: "label" }));
         /**
          * Prepend slot element.
          */
-        this.prependSlot = JSX.create("slot", { name: "prepend", class: "prepend" });
+        this.prependSlot = (JSX.create("slot", { name: "prepend", class: "prepend" }));
         /**
          * Center slot element.
          */
-        this.centerSlot = JSX.create("slot", { name: "center", class: "center" });
+        this.centerSlot = (JSX.create("slot", { name: "center", class: "center" }));
         /**
          * Append slot element.
          */
-        this.appendSlot = JSX.create("slot", { name: "append", class: "append" });
+        this.appendSlot = (JSX.create("slot", { name: "append", class: "append" }));
         /**
          * Field layout element.
          */
@@ -55,7 +55,7 @@ let Element = class Element extends Control.Element {
         /**
          * Field styles element.
          */
-        this.fieldStyles = JSX.create("style", { type: "text/css" }, this.styles.toString());
+        this.fieldStyles = (JSX.create("style", { type: "text/css" }, this.styles.toString()));
         const shadow = JSX.append(this.attachShadow({ mode: 'closed' }), this.fieldStyles, this.fieldLayout);
         shadow.addEventListener('slotchange', this.changeHandler.bind(this));
         shadow.addEventListener('keyup', this.changeHandler.bind(this));
@@ -75,7 +75,8 @@ let Element = class Element extends Control.Element {
     get empty() {
         const child = this.getRequiredChildElement(this.centerSlot);
         if (!('empty' in child)) {
-            return child.value === void 0 || ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0);
+            return (child.value === void 0 ||
+                ((typeof child.value === 'string' || child.value instanceof Array) && child.value.length === 0));
         }
         return child.empty;
     }

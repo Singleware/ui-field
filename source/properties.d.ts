@@ -48,6 +48,10 @@ export interface Properties {
    */
   disabled?: boolean;
   /**
+   * Field tab index.
+   */
+  tabIndex?: number;
+  /**
    * Field orientation.
    */
   orientation?: string;
